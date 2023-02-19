@@ -1,0 +1,31 @@
+version: "3"
+
+services:
+  app:
+    build: .
+    environment:
+      - FLASK_ENV=development
+      - REDIS_URL=redis://redis:6379/0
+      - MONGO_URI=mongodb://mongo:27017/messages
+    ports:
+      - "5000:5000"
+    depends_on:
+      - redis
+      - mongo
+  redis:
+    image: redis:6-alpine
+
+  mongo:
+    image: mongo:4.4.6-bionic
+    ports:
+      - "27017:27017"
+    volumes:
+        - /etc/custom_mongod.conf:/etc/mongod.conf
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.celery
+    depends_on:
+      - mongo
+      - redis
+
